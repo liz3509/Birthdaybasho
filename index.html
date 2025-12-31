@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🕺 DISCO DANCE PARTY 🕺</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    /* YOUR ORIGINAL STYLES - UNCHANGED */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: radial-gradient(circle at center, #0a0a23 0%, #1a0033 70%, #000 100%);
+      font-family: 'Orbitron', monospace;
+      color: #fff;
+      overflow: hidden;
+      height: 100vh;
+    }
+    
+    /* DISCO BALL */
+    .disco-ball {
+      position: fixed; top: 15%; left: 50%; transform: translateX(-50%);
+      width: 200px; height: 200px; background: linear-gradient(45deg, #ffd700, #ff1493, #00ff00, #00bfff, #ffd700);
+      border-radius: 50%; box-shadow: 0 0 50px #ff1493aa;
+      animation: rotate 20s linear infinite, glow 2s ease-in-out infinite alternate;
+    }
+    @keyframes rotate { 0% { transform: translateX(-50%) rotateY(0deg) rotateX(0deg); } 100% { transform: translateX(-50%) rotateY(360deg) rotateX(360deg); } }
+    @keyframes glow { 0% { box-shadow: 0 0 50px #ff1493aa; } 100% { box-shadow: 0 0 100px #00ff00cc, inset 0 0 50px #fff; } }
+    
+    /* LIGHTS */
+    .light { position: fixed; width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 30px currentColor; }
+    .light1 { top: 10%; left: 10%; background: #ff1493; animation: sweep1 4s linear infinite; }
+    .light2 { top: 20%; right: 15%; background: #00ff00; animation: sweep2 4s linear infinite 0.5s; }
+    .light3 { bottom: 20%; left: 20%; background: #00bfff; animation: sweep3 4s linear infinite 1s; }
+    .light4 { bottom: 10%; right: 10%; background: #ffd700; animation: sweep4 4s linear infinite 1.5s; }
+    @keyframes sweep1 { 0%,25%{transform:translate(0,0)rotate(0deg);}50%,75%{transform:translate(100px,-100px)rotate(180deg);}100%{transform:translate(0,0)rotate(360deg);} }
+    @keyframes sweep2 { 0%,25%{transform:translate(0,0)rotate(0deg);}50%,75%{transform:translate(-100px,100px)rotate(180deg);}100%{transform:translate(0,0)rotate(360deg);} }
+    
+    /* DANCE FLOOR */
+    .dance-floor {
+      position: fixed; bottom: 0; left: 0; width: 100%; height: 60vh;
+      background: repeating-linear-gradient(90deg, #1a0033 0, #1a0033 20px, #440088 20px, #440088 40px),
+                  repeating-linear-gradient(0deg, #1a0033 0, #1a0033 20px, #440088 20px, #440088 40px);
+      animation: floor-glow 3s ease-in-out infinite alternate;
+    }
+    @keyframes floor-glow { 0% { filter: brightness(1) hue-rotate(0deg); } 100% { filter: brightness(1.3) hue-rotate(180deg); } }
+    
+    /* TITLE */
+    h1 {
+      position: fixed; top: 5%; left: 50%; transform: translateX(-50%);
+      font-family: 'Fredoka One', cursive; font-size: clamp(2rem, 6vw, 4rem);
+      background: linear-gradient(45deg, #ffd700, #ff1493, #00ff00);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px #ff1493; animation: title-bounce 2s ease-in-out infinite;
+      z-index: 100;
+    }
+    @keyframes title-bounce { 0%,100%{transform:translateX(-50%)translateY(0);}50%{transform:translateX(-50%)translateY(-10px);} }
+    
+    /* ALL OTHER STYLES REMAIN THE SAME - just adding audio controls */
+    .click-arrow {
+      position: fixed; background: rgba(255,255,255,0.9); color: #ff1493; font-weight: 900;
+      border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; box-shadow: 0 10px 30px rgba(255,20,147,0.6); cursor: pointer; z-index: 150;
+      animation: pulse-arrow 2s ease-in-out infinite; border: 3px solid #ffd700;
+    }
+    .click-arrow:hover { animation-play-state: paused; transform: scale(1.2); }
+    @keyframes pulse-arrow {
+      0%,100%{transform:scale(1)rotate(0deg);box-shadow:0 10px 30px rgba(255,20,147,0.6);}
+      50%{transform:scale(1.3)rotate(180deg);box-shadow:0 0 50px #ff1493,0 0 80px #ffd700;}
+    }
+    .dj-arrow { top: 58%; left: 4%; }
+    .pinata-arrow { top: 22%; right: 4%; }
+    .guest-arrow { bottom: 35%; left: 18%; font-size: 1.5rem; }
+    
+    .dj-cat {
+      position: fixed; top: 55%; left: 8%; width: 110px; height: 110px; cursor: pointer;
+      background: linear-gradient(135deg, #ff69b4, #ffd700); border-radius: 50%;
+      box-shadow: 0 20px 50px rgba(255,105,180,0.7); transition: all 0.3s; z-index: 50;
+      border: 4px solid #ffd700;
+    }
+    .dj-cat::before { content: '🐱🎧'; font-size: 3rem; position: absolute; top: 20%; left: 50%; transform: translateX(-50%); }
+    .dj-cat:hover { transform: scale(1.2) rotate(20deg); box-shadow: 0 30px 70px rgba(255,105,180,0.9); }
+    
+    .spotify-player {
+      position: fixed; top: 25%; right: 5%; width: 300px; height: 480px;
+      background: linear-gradient(135deg, #1db954, #191414); border-radius: 25px;
+      box-shadow: 0 30px 80px rgba(29,185,84,0.5); display: none; padding: 25px; z-index: 100;
+      backdrop-filter: blur(20px); border: 2px solid rgba(255,255,255,0.3);
+    }
+    .spotify-player.active { display: block; animation: slideIn 0.6s ease-out; }
+    @keyframes slideIn { from { transform: translateX(100%) rotateY(90deg); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    
+    .album-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin: 20px 0; }
+    .album {
+      aspect-ratio: 1; border-radius: 18px; display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem; cursor: pointer; transition: all 0.4s; box-shadow: 0 12px 35px rgba(0,0,0,0.4);
+      position: relative; overflow: hidden; border: 3px solid rgba(255,255,255,0.2);
+    }
+    .album:hover { transform: translateY(-15px) scale(1.1) rotate(5deg); box-shadow: 0 30px 70px rgba(255,255,255,0.4); }
+    .album.active { animation: bounce 1s, glow 1.5s ease-in-out infinite alternate; box-shadow: 0 0 60px #1db954, 0 0 100px #1db95466; }
+    
+    .now-playing {
+      background: rgba(255,255,255,0.2); padding: 25px; border-radius: 25px; margin-top: 20px;
+      backdrop-filter: blur(20px); text-align: center; border: 2px solid rgba(255,255,255,0.3);
+    }
+    .sound-wave {
+      display: flex; gap: 6px; justify-content: center; margin-top: 20px; height: 50px;
+    }
+    .wave-bar {
+      width: 8px; background: linear-gradient(to top, #1db954, #00ff88); border-radius: 4px;
+      animation: wave 1.4s ease-in-out infinite; flex: 1; max-width: 8px;
+    }
+    .wave-bar:nth-child(2) { animation-delay: 0.15s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.3s; height: 45px; }
+    .wave-bar:nth-child(4) { animation-delay: 0.45s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.6s; height: 40px; }
+    @keyframes wave { 0%,100%{transform:scaleY(1);}50%{transform:scaleY(2.5);} }
+    
+    /* AUDIO CONTROLS */
+    .audio-controls {
+      margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.5); border-radius: 15px;
+    }
+    .volume-slider {
+      width: 100%; height: 6px; background: rgba(255,255,255,0.3); border-radius: 3px;
+      outline: none; appearance: none; cursor: pointer;
+    }
+    .volume-slider::-webkit-slider-thumb {
+      appearance: none; width: 20px; height: 20px; background: #1db954; border-radius: 50%;
+      box-shadow: 0 0 10px #1db954;
+    }
+    
+    .pinata {
+      position: fixed; top: 20%; right: 8%; width: 110px; height: 110px; cursor: pointer; z-index: 90;
+      transition: all 0.25s; font-size: 4rem; line-height: 110px; text-align: center;
+      text-shadow: 0 10px 30px rgba(255,105,180,0.8);
+    }
+    .pinata.hanging { animation: swing 3s ease-in-out infinite; }
+    @keyframes swing { 0%,100%{transform:rotate(-10deg)translateX(0)scale(1);}50%{transform:rotate(10deg)translateX(8px)scale(1.05);} }
+    
+    .guest {
+      position: fixed; bottom: 35%; font-size: 3.5rem; animation: dance 2.2s ease-in-out infinite;
+      cursor: pointer; text-shadow: 0 0 25px #00ff00; z-index: 20;
+    }
+    @keyframes dance {
+      0%,100%{transform:translateY(0)rotate(-6deg)scale(1);}25%{transform:translateY(-25px)rotate(6deg)scale(1.15);}
+      50%{transform:translateY(-12px)rotate(-4deg)scale(1);}75%{transform:translateY(-20px)rotate(4deg)scale(1.1);}
+    }
+    
+    .candy, .balloon { position: fixed; font-size: 2rem; pointer-events: none; z-index: 200; }
+    
+    .instructions {
+      position: fixed; bottom: 10%; left: 50%; transform: translateX(-50%);
+      background: rgba(255,255,255,0.15); padding: 20px 30px; border-radius: 30px;
+      backdrop-filter: blur(20px); border: 2px solid rgba(255,255,255,0.4);
+      font-size: 1rem; text-align: center; max-width: 400px; box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    }
+    
+    @media (max-width: 768px) {
+      .spotify-player { top: 45%; right: 3%; left: 3%; width: auto; transform: translateY(-50%); height: 500px; }
+      .dj-cat { left: 50%; transform: translateX(-50%); top: 65%; }
+      .pinata { right: 50%; transform: translateX(50%); }
+      .guest { font-size: 3rem; }
+      .click-arrow { width: 50px; height: 50px; font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- HIDDEN AUDIO ELEMENTS - ADD YOUR MP3 FILES HERE -->
+  <audio id="audio0" preload="auto" style="display: none;">
+    <source src="i walk this earth all by myself • EKKSTACY and 6 more pages - Personal - Microsoft_ Edge 2025-10-23 20-48-05.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="audio1" preload="auto" style="display: none;">
+    <source src="Untitled video.mp3" type="audio/mpeg"> 
+  </audio>
+  <audio id="audio2" preload="auto" style="display: none;">
+    <source src="let-the-green-talk-355639.mp3" type="audio/mpeg"> 
+  </audio>
+  <audio id="audio3" preload="auto" style="display: none;">
+    <source src="motivational-rap-300318.mp3" type="audio/mpeg"> 
+  </audio>
+
+  <div class="disco-ball"></div>
+  <div class="light light1"></div>
+  <div class="light light2"></div>
+  <div class="light light3"></div>
+  <div class="light light4"></div>
+  
+  <h1>🕺 DISCO DANCE PARTY 🕺</h1>
+  
+  <div class="dance-floor"></div>
+  
+  <!-- CLICK ARROWS -->
+  <div class="click-arrow dj-arrow" onclick="toggleSongs()" title="Click DJ Cat!">👆</div>
+  <div class="click-arrow pinata-arrow" onclick="hitPinata()" title="Click Piñata!">👆</div>
+  <div class="click-arrow guest-arrow" title="Click dancers!">🕺</div>
+  
+  <!-- DJ CAT -->
+  <div class="dj-cat" onclick="toggleSongs()" title="Click for music!"></div>
+  
+  <!-- SPOTIFY PLAYER WITH AUDIO CONTROLS -->
+  <div class="spotify-player" id="spotifyPlayer">
+    <h3 style="color: #1db954; font-family: 'Fredoka One'; margin-bottom: 25px; font-size: 1.4rem;">🐱 DJ CAT's Playlist</h3>
+    <div class="album-grid">
+      <div class="album" style="background: linear-gradient(45deg, #ff6b6b, #ee5a52);" onclick="playSong(0)">💿</div>
+      <div class="album" style="background: linear-gradient(45deg, #4ecdc4, #44a08d);" onclick="playSong(1)">🎸</div>
+      <div class="album" style="background: linear-gradient(45deg, #45b7d1, #3498db);" onclick="playSong(2)">🎤</div>
+      <div class="album" style="background: linear-gradient(45deg, #f9ca24, #f0932b);" onclick="playSong(3)">🌟</div>
+    </div>
+    <div class="now-playing" id="nowPlaying">
+      <div style="opacity: 0.8; font-size: 1.1rem;">👆 Click an album!</div>
+    </div>
+    <!-- AUDIO CONTROLS -->
+    <div class="audio-controls">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+        <span style="font-size: 0.9rem;">🔊 Volume:</span>
+        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="0.7" onchange="setVolume(this.value)">
+      </div>
+      <button onclick="togglePlayPause()" style="width: 100%; padding: 10px; background: #1db954; color: white; border: none; border-radius: 20px; font-weight: 700; cursor: pointer;">▶️ PLAY / PAUSE</button>
+    </div>
+  </div>
+  
+  <!-- PIÑATA -->
+  <div class="pinata hanging" id="pinata" onclick="hitPinata()" title="Click 5x to break!">🪅</div>
+  
+  <!-- GUESTS -->
+  <div class="guest" style="left: 12%; animation-delay: 0s;" onclick="partyTrick(this)">🕺</div>
+  <div class="guest" style="left: 22%; animation-delay: 0.3s;" onclick="partyTrick(this)">💃</div>
+  <div class="guest" style="left: 32%; animation-delay: 0.6s;" onclick="partyTrick(this)">👯‍♀️</div>
+  <div class="guest" style="right: 32%; animation-delay: 0.9s;" onclick="partyTrick(this)">🕺</div>
+  <div class="guest" style="right: 22%; animation-delay: 0.15s;" onclick="partyTrick(this)">💃</div>
+  <div class="guest" style="right: 12%; animation-delay: 0.45s;" onclick="partyTrick(this)">👯‍♂️</div>
+  
+  <!-- INSTRUCTIONS -->
+  <div class="instructions">
+    <div>🎵 <span style="color: #ffd700; font-weight: 700;">Click DJ Cat → Music</span></div>
+    <div>🪅 <span style="color: #ff69b4; font-weight: 700;">Click Piñata 5x → Candy!</span></div>
+    <div>🕺 <span style="color: #00ff00; font-weight: 700;">Click dancers → Tricks</span></div>
+  </div>
+
+  <script>
+    // 🎵 ADD YOUR AUDIO FILES HERE - Just uncomment and replace paths:
+    const songAudioFiles = [
+      'i walk this earth all by myself • EKKSTACY and 6 more pages - Personal - Microsoft_ Edge 2025-10-23 20-48-05.mp3',      // Song 0
+      'Untitled video.mp3',   // Song 1  
+      'let-the-green-talk-355639.mp3',   // Song 2
+      'motivational-rap-300318.mp3'   // Song 3
+    ];
+    
+    const songs = [
+      { name: 'Back to the old house', artist: 'The Smiths', color: '#ff6b6b' },
+      { name: 'I walk this earth all by myself', artist: 'EKKSTACY', color: '#4ecdc4' },
+      { name: 'Let the green talk', artist: 'Unsure', color: '#45b7d1' },
+      { name: 'Party rap', artist: 'Gansta cu', color: '#f9ca24' }
+    ];
+    
+    let currentSong = -1;
+    let audioPlayer = null;
+    let hitCount = 0;
+    let isPlaying = false;
+    
+    // Initialize audio players
+    function initAudio() {
+      for(let i = 0; i < 4; i++) {
+        const audio = document.getElementById(`audio${i}`);
+        audio.volume = 0.7;
+      }
+    }
+    
+    function toggleSongs() {
+      const player = document.getElementById('spotifyPlayer');
+      player.classList.toggle('active');
+    }
+    
+    function playSong(index) {
+      // Stop current song
+      if(audioPlayer) {
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+      }
+      
+      currentSong = index;
+      const song = songs[index];
+      
+      // Load and play new song
+      audioPlayer = document.getElementById(`audio${index}`);
+      if(audioPlayer) {
+        audioPlayer.play().catch(e => console.log('Audio play failed:', e));
+        isPlaying = true;
+      }
+      
+      // Update UI
+      document.querySelectorAll('.album').forEach((album, i) => {
+        album.classList.toggle('active', i === index);
+      });
+      
+      document.getElementById('nowPlaying').innerHTML = `
+        <div style="font-size: 1.3rem; font-weight: 800; color: ${song.color}; margin-bottom: 10px;">${song.name}</div>
+        <div style="font-size: 1rem; opacity: 0.95; margin-bottom: 18px;">${song.artist}</div>
+        <div class="sound-wave">
+          <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div><div class="wave-bar"></div>
+        </div>
+      `;
+      
+      megaConfetti([song.color, '#ffd700']);
+      console.log(`🎵 NOW PLAYING: ${song.name} 🕺💃`);
+    }
+    
+    function togglePlayPause() {
+      if(!audioPlayer) return;
+      
+      if(isPlaying) {
+        audioPlayer.pause();
+        isPlaying = false;
+      } else {
+        audioPlayer.play().catch(e => console.log('Audio play failed:', e));
+        isPlaying = true;
+      }
+    }
+    
+    function setVolume(volume) {
+      if(audioPlayer) {
+        audioPlayer.volume = volume;
+      }
+    }
+    
+    // ALL YOUR OTHER FUNCTIONS (unchanged)
+    function hitPinata() {
+      hitCount++;
+      const pinata = document.getElementById('pinata');
+      
+      pinata.style.animation = 'none';
+      pinata.style.transform = `scale(0.8) rotate(${hitCount * 45}deg)`;
+      pinata.style.fontSize = (4 - hitCount * 0.2) + 'rem';
+      
+      if (hitCount >= 5) {
+        pinata.style.display = 'none';
+        megaCandyRain();
+        setTimeout(() => {
+          alert('🎉 🪅 PIÑATA SMASHED! CANDY RAIN! 🍭🍬🍫🎉');
+          hitCount = 0;
+          pinata.style.display = 'block';
+          pinata.classList.add('hanging');
+          pinata.style.transform = '';
+          pinata.style.fontSize = '4rem';
+        }, 1500);
+      } else {
+        setTimeout(() => pinata.classList.add('hanging'), 300);
+      }
+    }
+    
+    function partyTrick(guest) {
+      guest.style.animation = 'none';
+      setTimeout(() => {
+        guest.style.transform = 'scale(1.6) rotate(1080deg)';
+        guest.style.transition = 'all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+        confetti({ particleCount: 80, spread: 90 });
+      }, 50);
+      setTimeout(() => {
+        guest.style.animation = 'dance 2.2s ease-in-out infinite';
+        guest.style.transform = '';
+        guest.style.transition = '';
+      }, 850);
+    }
+    
+    function megaCandyRain() {
+      const candies = ['🍭','🍬','🍫','🍪','🎂','🍩','🍦','🍬','🍭','🍒'];
+      for (let i = 0; i < 45; i++) {
+        setTimeout(() => {
+          const candy = document.createElement('div');
+          candy.className = 'candy';
+          candy.textContent = candies[Math.floor(Math.random() * candies.length)];
+          candy.style.left = (25 + Math.random() * 50) + '%';
+          candy.style.top = '25%';
+          candy.style.animation = `fall ${Math.random() * 2.5 + 3}s linear forwards`;
+          document.body.appendChild(candy);
+          setTimeout(() => candy.remove(), 5500);
+        }, i * 90);
+      }
+    }
+    
+    function megaConfetti(colors = ['#ffd700', '#ff1493', '#00ff00', '#00bfff']) {
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+          confetti({
+            particleCount: 130,
+            spread: 110,
+            origin: { y: 0.5, x: Math.random() },
+            colors: colors
+          });
+        }, i * 180);
+      }
+    }
+    
+    // ANIMATIONS
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fall {
+        0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(120vh) rotate(1440deg); opacity: 0; }
+      }
+      @keyframes swing {
+        0%,100%{transform:rotate(-10deg)translateX(0)scale(1);}50%{transform:rotate(10deg)translateX(8px)scale(1.05);}
+      }
+      @keyframes bounce { 0%,100%{transform:scale(1);}50%{transform:scale(1.25);} }
+      @keyframes glow { 0%{box-shadow:0 0 30px #1db954;}100%{box-shadow:0 0 60px #1db954,0 0 100px #1db95466;} }
+    `;
+    document.head.appendChild(style);
+    
+    // Initialize audio on load
+    window.addEventListener('load', initAudio);
+  </script>
+</body>
+</html>

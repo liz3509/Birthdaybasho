@@ -1,0 +1,1 @@
+This is a Disco party!! made for Hackclubs YSWS Birthday card program! :) play different music by tapping DJ cat :p, hit the piñata 5x to get candy, lots of dancing and confetti!! 🎊 🪅🥳🚀💫✨
